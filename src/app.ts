@@ -70,13 +70,14 @@ export const startApp = async (
     })
 
     conSettings.setDataProvider({
-        load(): Array<StoredConnectionSettings> {
+        load: (): Array<StoredConnectionSettings> => {
+            console.log('storedConnections', storedConnections)
             return storedConnections;
         },
-        save(data: Array<StoredConnectionSettings>): void {
+        save: (data: Array<StoredConnectionSettings>): void => {
             storedConnections = data;
         },
-        delete(id: string): void {
+        delete: (id: string): void => {
             storedConnections = storedConnections.filter(x => x.name !== id);
         }
     });
@@ -135,9 +136,9 @@ export interface ConnectionsSettings {
 }
 
 export interface DataProvider<T> {
-    load(): Array<T>;
-    save(data: Array<T>): void;
-    delete(id: string): void;
+    load: () => Array<T>;
+    save: (data: Array<T>) => void;
+    delete: (id: string) => void;
 }
 
 export interface StoredConnectionSettings {

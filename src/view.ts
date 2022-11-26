@@ -312,10 +312,12 @@ export class QtConnectionsSettings implements ConnectionsSettings {
     private table = new QTreeWidget()
     private button = new QPushButton()
 
-    private loadData: () => Array<StoredConnectionSettings> = () => [];
-    private saveData: () => void = () => {};
+    private data: DataProvider<StoredConnectionSettings> = {
+        load: () => [],
+        save: (data: Array<StoredConnectionSettings>) => {},
+        delete: (id: string) => {}
+    }
     private connect: (name: string) => void = (_: string) => {};
-
 
     constructor() {
         this.dialog.setWindowTitle('Connections');
@@ -324,7 +326,7 @@ export class QtConnectionsSettings implements ConnectionsSettings {
 
         this.table.setColumnCount(2);
         this.table.setHeaderLabels(['Name', 'URI']);
-        this.table.addEventListener('itemChanged', () => this.saveData());
+        //this.table.addEventListener('itemChanged', () => this.saveData());
 
         const layout = new QGridLayout();
 
@@ -349,34 +351,32 @@ export class QtConnectionsSettings implements ConnectionsSettings {
         this.connect = cb;
     }
 
-    onLoad(cb: () => Array<StoredConnectionSettings>): void {
-        this.loadData = cb;
-    }
-
     onDelete(cb: (id: string) => void): void {
     }
-
-    onSave(cb: (form: Array<StoredConnectionSettings>) => void): void {
-        this.saveData = () => {
-            const toSave: Array<StoredConnectionSettings> = [];
-            this.table.topLevelItems.forEach(item => {
-                toSave.push({
-                    name: item.text(0),
-                    uri: item.text(1)
-                })
-            })
-            cb(toSave);
-        };
-    }
+    //
+    // onSave(cb: (form: Array<StoredConnectionSettings>) => void): void {
+    //     this.?? = () => {
+    //         const toSave: Array<StoredConnectionSettings> = [];
+    //         this.table.topLevelItems.forEach(item => {
+    //             toSave.push({
+    //                 name: item.text(0),
+    //                 uri: item.text(1)
+    //             })
+    //         })
+    //         cb(toSave);
+    //     };
+    // }
 
     onValidate(cb: (form: object) => (object | null)): void {
     }
 
     open(): void {
         this.table.clear();
-        const data = this.loadData();
+        const data = this.data.load();
         let first = true;
+        console.log(data)
         for(const item of data) {
+
             const qItem = new QTreeWidgetItem()
             qItem.setFlags(qItem.flags() | ItemFlag.ItemIsEditable);
             qItem.setIcon(0, connectionIcon);
@@ -401,6 +401,7 @@ export class QtConnectionsSettings implements ConnectionsSettings {
     }
 
     setDataProvider(dp: DataProvider<StoredConnectionSettings>): void {
+        this.data = dp;
     }
 }
 
